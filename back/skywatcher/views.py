@@ -22,14 +22,9 @@ def get_asteroids(request):
     near_earth_objects = data['near_earth_objects']
     for date in near_earth_objects:
         for asteroid in near_earth_objects[date]:
-            asteroid_info = {
-                'id': asteroid['id'],
-                'name': asteroid['name'],
-                'neo_reference_id': asteroid['neo_reference_id'],
-                'absolute_magnitude_h': asteroid['absolute_magnitude_h'],
-                'is_potentially_hazardous_asteroid': asteroid['is_potentially_hazardous_asteroid'],
-                # Add more fields as needed
-            }
+            asteroid_info = {}
+            for info in asteroid:
+                asteroid_info[str(info)] = asteroid[info] 
             asteroid_list.append(asteroid_info)
 
     return JsonResponse({'asteroids': asteroid_list})

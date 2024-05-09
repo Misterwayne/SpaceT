@@ -19,11 +19,13 @@ from django.contrib import admin
 from django.urls import path, re_path
 from django.views.generic import TemplateView
 from skywatcher.views import get_asteroids
+from skywatcher.views import GetDescription
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='index.html')),
     path('admin/', admin.site.urls),
     path('asteroids/', get_asteroids, name='get_asteroids'),
+    path('asteroids/description', GetDescription, name='get_description'),
 ]
 
 from django.urls import path

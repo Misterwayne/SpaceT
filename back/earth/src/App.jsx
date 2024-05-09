@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import DateInput from './component/DateInput';
-import AsteroidList from './component/AsteroidList';
-import AsteroidDetail from './component/AsteroidDetails';
 import CanvasRenderer from './component/Canvas'
 
 const App = () => {
   const [asteroids, setAsteroids] = useState([]);
   const [selectedAsteroid, setSelectedAsteroid] = useState(null);
+  const [Description, setSelectedDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState('');
 
   const fetchAsteroids = async (startDate, endDate) => {
@@ -35,11 +34,11 @@ const App = () => {
 
   const handleItemClick = async (asteroid) => {
     try {
-      const response = await axios.get(
-        `https://api.nasa.gov/neo/rest/v1/neo/${asteroid.id}?api_key=C19kqwt7QP6bxW07ckplyYYedRVjrpAOiuaagRbB`
-      );
-      setSelectedAsteroid(response.data);
-      console.log(selectedAsteroid)
+      const description = await axios.get(`http://localhost:8000/asteroids/description?name=${asteroid.name}`);
+      setSelectedDescription(description.data.description);
+      asteroid.description = Description
+      setSelectedAsteroid(asteroid)
+      console.log(Description)
     } catch (error) {
       console.error('Error fetching asteroid details:', error);
     }
@@ -49,11 +48,19 @@ const App = () => {
     <div>
       <h1 class="tiltle">NASA Asteroids</h1>
       <DateInput onSubmit={fetchAsteroids} />
+      <h1 className='tiltle'>Asteroids</h1>
+      <ul style={{position: 'absolute', height: '60%', zIndex: 1, overflow: 'auto',background: '##0000008f'}}>
+        {asteroids.map(asteroid => (
+          <li key={asteroid.id} onClick={() => handleItemClick(asteroid)} style={{padding: '2px', border: '1px white solid', color:'white', background: '##0000008f'}}>
+            {asteroid.name}
+          </li>
+        ))}
+      </ul>
       <div class="bg">
       <img src='/static/images/MotleyFool-TMOT-6b0d4105-space.webp'alt="background" class="background-image"/>   
       </div>
       <section class="content">
-        <CanvasRenderer asteroids={asteroids} onItemClick={handleItemClick} />
+        <CanvasRenderer asteroids={asteroids} onItemClick={handleItemClick} selected={selectedAsteroid} description={Description} />
       </section>
     </div>
   );

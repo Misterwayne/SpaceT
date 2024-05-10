@@ -5,13 +5,18 @@ from django.http import JsonResponse
 import os
 from groq import Groq # Official Groq API Python package
 
+from dotenv import load_dotenv
+import os
 
-os.environ["OPENAI_API_BASE"] = 'https://api.groq.com/openai/v1'
-os.environ["OPENAI_MODEL_NAME"] = 'llama3-8b-8192'
-os.environ["OPENAI_API_KEY"] = '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'
+# Load environment variables from .env file
+load_dotenv()
+
+# Access the environment variables
+groq_key = os.getenv("OPENAI_API_KEY")
+nasa_key = os.getenv("NASA_KEY")
 
 client = Groq(
-    api_key="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",
+    api_key=groq_key,
 )
 
 
@@ -41,11 +46,11 @@ def GetDescription(resquest):
 def get_asteroids(request):
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-    api_key = 'C19kqwt7QP6bxW07ckplyYYedRVjrpAOiuaagRbB'
+
 
     # Make a request to the NASA API
     response = requests.get(
-        f'https://api.nasa.gov/neo/rest/v1/feed?start_date={start_date}&end_date={end_date}&api_key={api_key}'
+        f'https://api.nasa.gov/neo/rest/v1/feed?start_date={start_date}&end_date={end_date}&api_key={nasa_key}'
     )
     data = response.json()
 

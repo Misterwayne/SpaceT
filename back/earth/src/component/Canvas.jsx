@@ -1,12 +1,27 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import axios from 'axios';
+import { RotatingLines } from "react-loader-spinner";
 
-const CanvasRenderer = ({ asteroids, selected, description }) => {
+function Loader() {
+  return (
+    <RotatingLines
+      strokeColor="grey"
+      strokeWidth="5"
+      animationDuration="0.75"
+      width="96"
+      visible={true}
+    />
+  );
+}
+
+
+const CanvasRenderer = ({ asteroids, selected, description, loading }) => {
   const canvasRef = useRef(null);
   const [selectedAsteroid, setSelectedAsteroid] = useState(selected);
-  const [selectedDescription, setSelectedDescription] = useState('')
+  const [selectedDescription, setSelectedDescription] = useState('');
+  const [isLoading, setIsLoading] = useState(false); // État pour suivre le chargement
   const backgroundImage = new Image();
-  backgroundImage.src = "/static/images/MotleyFool-TMOT-6b0d4105-space.webp";
+  backgroundImage.src = "/static/images/earth-space.jpg";
   const asteroidImage = new Image();
   asteroidImage.src = "/static/images/asteroid.png";
   const asteroidImage2 = new Image();
@@ -35,21 +50,15 @@ const CanvasRenderer = ({ asteroids, selected, description }) => {
     });
   }, [asteroids]); // Re-compute if asteroidsData changes
 
+  useEffect(() =>{
+    setIsLoading(loading)
+  }, [loading])
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
     let animationFrameId;
 
-    const loadImages = async () => {
-      const imagePromises = transformedAsteroids.map(async (asteroid) => {
-        const img = new Image();
-        img.src = `/static/images/asteroid.png`; // Adjust the path to where your images are stored
-        await new Promise((resolve) => img.onload = resolve);
-        return img;
-      });
-      const images = await Promise.all(imagePromises);
-      return images.reduce((acc, img, index) => ({...acc, [transformedAsteroids[index].name]: img }), {});
-    };
 
     const render = () => {
       // Clear the canvas for the next frame
@@ -72,7 +81,6 @@ const CanvasRenderer = ({ asteroids, selected, description }) => {
         if (selected) {
           name = selected.name
         }
-        console.log(asteroid.estimated_diameter.meters['estimated_diameter_min'] / 20)
         if (asteroid.name === name) {
           context.drawImage(asteroidImage2, asteroid.x, asteroid.y, asteroid.estimated_diameter.meters['estimated_diameter_min'] / 10, asteroid.estimated_diameter.meters['estimated_diameter_min'] / 10);
         } else {
@@ -121,12 +129,13 @@ const CanvasRenderer = ({ asteroids, selected, description }) => {
                y > asteroidRect.top && y < asteroidRect.top + asteroidRect.height;
       });
 
-
+      setIsLoading(true);
       const newdescription = await fetchDescription(clickedAsteroid);
       clickedAsteroid.description = newdescription
       // Update the selected asteroid state with the fetched description
       selected = clickedAsteroid
-      setSelectedAsteroid(clickedAsteroid); // Update the selected asteroid state
+      setSelectedAsteroid(clickedAsteroid);
+      setIsLoading(false) // Update the selected asteroid state
     };
 
     canvas.addEventListener('click', handleClick);
@@ -146,8 +155,10 @@ const CanvasRenderer = ({ asteroids, selected, description }) => {
   return (
     <div>
       <canvas ref={canvasRef} />
-      {selectedAsteroid && (
-        <div style={{ position: 'absolute', top: 0, right: 0, color: 'white', background: '#0000008f', padding: '10px', border: '2px solid white', width: '50vh'}}>
+      {selectedAsteroid &&
+        <div>
+        {!isLoading ? (
+          <div style={{ position: 'absolute', top: 0, right: 0, color: 'white', background: '#0000008f', padding: '10px', border: '2px solid white', width: '50vh'}}>
           <h3>{selectedAsteroid.name}</h3>
           <p>Estimated Diameter: {selectedAsteroid.estimated_diameter.meters['estimated_diameter_min']} meters</p>
           <p>Relative Velocity: {selectedAsteroid.velocityX} km/s</p>
@@ -157,13 +168,15 @@ const CanvasRenderer = ({ asteroids, selected, description }) => {
           <p><a href={selectedAsteroid.nasa_jpl_url} target="_blank">NASA/JPL Data</a></p>
           <p><a href={selectedAsteroid.links.self} target="_blank">NASA API Data</a></p>
           {selectedAsteroid.description ? (
-            <p style={{overflow: 'auto'}}>{selectedAsteroid.description}</p>
-          ) : (
-            <p style={{overflow: 'auto'}}>{selectedDescription}</p>
-            )
+              <p style={{overflow: 'auto'}}>{selectedAsteroid.description}</p>
+            ) : <p style={{overflow: 'auto'}}>{description}</p>
           }
+          </div>
+        ) : (
+          <div style={{ position: 'absolute', top: 100, right: 100}}><Loader/></div>
+        )}
         </div>
-      )}
+      }
     </div>
   );
 };

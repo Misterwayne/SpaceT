@@ -1,0 +1,3 @@
+django
+groq==0.1.2 # Official Groq API Python package
+requests

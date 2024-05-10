@@ -24,7 +24,7 @@ const DateInput = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ backgroundColor: 'rgba(255, 255, 255, 0.8)', padding: '20px', borderRadius: '10px' }}>
+    <form onSubmit={handleSubmit} style={{ backgroundColor: 'rgba(6, 6, 6, 0.46)', padding: '20px', borderRadius: '10px' }}>
       <input
         type="date"
         value={startDate}

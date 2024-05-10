@@ -6,6 +6,7 @@ import CanvasRenderer from './component/Canvas'
 const App = () => {
   const [asteroids, setAsteroids] = useState([]);
   const [selectedAsteroid, setSelectedAsteroid] = useState(null);
+  const [isLoading, setIsLoading] = useState(false); // État pour suivre le chargement
   const [Description, setSelectedDescription] = useState("");
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -34,11 +35,12 @@ const App = () => {
 
   const handleItemClick = async (asteroid) => {
     try {
+      setIsLoading(true);
       const description = await axios.get(`http://localhost:8000/asteroids/description?name=${asteroid.name}`);
       setSelectedDescription(description.data.description);
       asteroid.description = Description
       setSelectedAsteroid(asteroid)
-      console.log(Description)
+      setIsLoading(false)
     } catch (error) {
       console.error('Error fetching asteroid details:', error);
     }
@@ -60,7 +62,7 @@ const App = () => {
       <img src='/static/images/MotleyFool-TMOT-6b0d4105-space.webp'alt="background" class="background-image"/>   
       </div>
       <section class="content">
-        <CanvasRenderer asteroids={asteroids} onItemClick={handleItemClick} selected={selectedAsteroid} description={Description} />
+        <CanvasRenderer asteroids={asteroids} onItemClick={handleItemClick} selected={selectedAsteroid} description={Description} loading={isLoading} />
       </section>
     </div>
   );
